@@ -1,0 +1,18 @@
+language: go
+
+go:
+  - "1.13"
+  - master
+
+go_import_path: github.com/MehGokalp/vendor-rhino
+
+services:
+  - mysql
+
+script:
+#  - go test -v ./...
+  - bash ./scripts/gofmt.sh
+  - bash ./scripts/coverage.sh
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
