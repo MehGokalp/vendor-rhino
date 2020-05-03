@@ -1,13 +1,13 @@
 language: go
 
+go:
+  - "1.13"
+  - master
+
 jobs:
   fast_finish: true
-  include:
-    - name: "1.3 Stable version test"
-      go: "1.13"
   allow_failures:
-    - name: "Latest version test"
-      go: master
+    - go: master
 
 go_import_path: github.com/MehGokalp/vendor-rhino
 
