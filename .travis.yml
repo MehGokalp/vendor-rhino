@@ -1,8 +1,11 @@
 language: go
 
-go:
-  - "1.13"
-  - master
+matrix:
+  fast_finish: true
+  include:
+    - go: "1.13"
+  allow_failures:
+    - go: master
 
 go_import_path: github.com/MehGokalp/vendor-rhino
 

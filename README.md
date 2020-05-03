@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/MehGokalp/vendor-rhino.svg?branch=master)](https://travis-ci.org/MehGokalp/vendor-rhino)
+[![Build Status](https://travis-ci.org/MehGokalp/vendor-rhino.svg?branch=master)](https://travis-ci.org/MehGokalp/vendor-rhino) [![codecov](https://codecov.io/gh/MehGokalp/vendor-rhino/branch/master/graph/badge.svg)](https://codecov.io/gh/MehGokalp/vendor-rhino)
 
 # Welcome to VENDOR RHINO API
 This API allows you to create, remove and list virtual cards. This project works as a VCC provider.  
