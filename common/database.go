@@ -21,3 +21,7 @@ func Connect() *gorm.DB {
 func GetDB() *gorm.DB {
 	return DB
 }
+
+func SaveOne(obj interface{}) error {
+	return DB.Save(obj).Error
+}

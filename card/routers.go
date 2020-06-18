@@ -2,6 +2,7 @@ package card
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/mehgokalp/vendor-rhino/common"
 	"net/http"
 )
 
@@ -12,10 +13,20 @@ func RegisterRoutes(r *gin.RouterGroup) {
 }
 
 func createCard(c *gin.Context) {
-	// TODO: Implement create card action
-	c.JSON(http.StatusCreated, gin.H{
-		"message": "OK",
-	})
+	validator := NewCardValidator()
+
+	if err := validator.Bind(c); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, common.NewValidatorError(err))
+		return
+	}
+
+	if err := common.SaveOne(validator.Model); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, common.NewError("database", err))
+		return
+	}
+
+	serializer := CardSerializer{validator.Model}
+	c.JSON(http.StatusCreated, serializer.Response())
 }
 
 func findCard(c *gin.Context) {
