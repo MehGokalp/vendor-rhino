@@ -5,13 +5,13 @@ import (
 	"gopkg.in/go-playground/validator.v9"
 )
 
-// My own Error type that will help return my customized Error info
-//  {"database": {"hello":"no such table", error: "not_exists"}}
+// CommonError will help to return customized Error info
+// {"database": {"hello":"no such table", error: "not_exists"}}
 type CommonError struct {
 	Errors map[string]interface{} `json:"errors"`
 }
 
-// To handle the error returned by c.Bind in gin framework
+// NewValidatorError handles the error returned by c.Bind in gin framework
 // https://github.com/go-playground/validator/blob/v9/_examples/translations/main.go
 func NewValidatorError(err error) CommonError {
 	res := CommonError{}
@@ -35,7 +35,7 @@ func NewValidatorError(err error) CommonError {
 	return res
 }
 
-// Warp the error info in a object
+// NewError warps the error info in a object
 func NewError(key string, err error) CommonError {
 	res := CommonError{}
 	res.Errors = make(map[string]interface{})
