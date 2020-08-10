@@ -8,6 +8,7 @@ import (
 var DB *gorm.DB
 
 func Connect() *gorm.DB {
+	// TODO: read password from .env
 	db, err := gorm.Open("mysql", "root:123456@/vendor_rhino?charset=utf8&parseTime=True")
 
 	if err != nil {
