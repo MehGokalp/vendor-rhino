@@ -13,7 +13,7 @@ type Card struct {
 	Reference      string     `gorm:"size:255;unique_index;column:reference"`
 	CardNumber     string     `gorm:"size:255;unique_index;column:card_number"`
 	Cvc            string     `gorm:"size:255;column:cvc"`
-	Active         bool       `gorm:"column:active,default:true"`
+	Active         bool       `gorm:"column:active;default:true"`
 	CurrencyId     uint       `gorm:"column:currency_id"`
 	Currency       *Currency
 }

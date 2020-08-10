@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+// BEGIN - Create card action validator
+
 type CreateCardValidator struct {
 	Input struct {
 		Currency       string     `form:"currency" binding:"required"`
@@ -42,6 +44,10 @@ func NewCreateCardValidator() CreateCardValidator {
 	return CreateCardValidator{}
 }
 
+// END - Create card action validator
+
+// BEGIN - Find card action validator
+
 type FindCardValidator struct {
 	Input struct {
 		Reference string `uri:"reference" binding:"required"`
@@ -70,4 +76,36 @@ func (v *FindCardValidator) Bind(c *gin.Context) error {
 
 func NewFindCardValidator() FindCardValidator {
 	return FindCardValidator{}
+}
+
+// END - Find card action validator
+
+type DeleteCardValidator struct {
+	Input struct {
+		Reference string `uri:"reference" binding:"required"`
+	}
+	Model Card
+}
+
+func (v *DeleteCardValidator) Bind(c *gin.Context) error {
+	err := common.BindUrl(c, v)
+	if err != nil {
+		return err
+	}
+
+	var card Card
+	DB := common.GetDB()
+	DB.Where("reference = ?", v.Input.Reference).First(&card)
+
+	if card.ID == 0 {
+		return CardNotFoundError{reference: v.Input.Reference}
+	}
+
+	v.Model = card
+
+	return nil
+}
+
+func NewDeleteCardValidator() DeleteCardValidator {
+	return DeleteCardValidator{}
 }

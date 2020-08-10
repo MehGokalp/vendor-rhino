@@ -14,10 +14,13 @@ CREATE TABLE `card` (
   `card_number` VARCHAR(255) NOT NULL,
   `cvc` VARCHAR(255) NOT NULL,
   `active` TINYINT(1) NULL DEFAULT 1,
-  `deleted_at` DATE NULL DEFAULT NULL,
+  `deleted_at` DATETIME NULL DEFAULT NULL,
+  `created_at` DATETIME NULL DEFAULT NULL,
+  `updated_at` DATETIME NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE INDEX `card_card_number_UNIQUE` (`card_number` ASC),
   INDEX `card_currency_id_idx` (`currency_id` ASC),
+  INDEX `card_deleted_at` (`deleted_at` ASC),
   CONSTRAINT `currency_idx`
       FOREIGN KEY (`currency_id`)
           REFERENCES `currency` (`id`)

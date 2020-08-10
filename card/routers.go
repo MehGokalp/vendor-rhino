@@ -9,7 +9,7 @@ import (
 func RegisterRoutes(r *gin.RouterGroup) {
 	r.POST("/create", createCard)
 	r.GET("/find/:reference", findCard)
-	r.DELETE("/remove", removeCard)
+	r.DELETE("/remove/:reference", removeCard)
 }
 
 func createCard(c *gin.Context) {
@@ -44,6 +44,14 @@ func findCard(c *gin.Context) {
 }
 
 func removeCard(c *gin.Context) {
-	// TODO: Implement remove card action
+	validator := NewDeleteCardValidator()
+
+	if err := validator.Bind(c); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, common.NewValidatorError(err))
+		return
+	}
+
+	common.GetDB().Delete(validator.Model)
+
 	c.JSON(http.StatusNoContent, gin.H{})
 }
