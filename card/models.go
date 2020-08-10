@@ -2,14 +2,11 @@ package card
 
 import (
 	"github.com/jinzhu/gorm"
-	"github.com/mehgokalp/vendor-rhino/common"
 	"time"
 )
 
 type Card struct {
 	gorm.Model
-	common.SoftDeletableEntity
-	common.TimestampEntity
 	ID             uint       `gorm:"column:id"`
 	Balance        uint       `gorm:"column:balance"`
 	ActivationDate *time.Time `gorm:"column:activation_date"`
@@ -17,9 +14,9 @@ type Card struct {
 	Reference      string     `gorm:"size:255;unique_index;column:reference"`
 	CardNumber     string     `gorm:"size:255;unique_index;column:card_number"`
 	Cvc            string     `gorm:"size:255;column:cvc"`
-	Active         bool       `gorm:"column:active"`
+	Active         bool       `gorm:"column:active,default:true"`
 	CurrencyId     uint       `gorm:"column:currency_id"`
-	Currency       Currency
+	Currency       *Currency
 }
 
 func (c *Card) TableName() string {

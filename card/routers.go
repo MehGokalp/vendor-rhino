@@ -8,7 +8,7 @@ import (
 
 func RegisterRoutes(r *gin.RouterGroup) {
 	r.POST("/create", createCard)
-	r.GET("/find", findCard)
+	r.GET("/find/:reference", findCard)
 	r.DELETE("/remove", removeCard)
 }
 
@@ -20,7 +20,9 @@ func createCard(c *gin.Context) {
 		return
 	}
 
-	if err := common.SaveOne(validator.Model); err != nil {
+	populateCardInformation(&validator.Model)
+
+	if err := common.SaveOne(&validator.Model); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, common.NewError("database", err))
 		return
 	}

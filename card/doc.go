@@ -1,5 +1,5 @@
 /*
-The card module containing the article CRUD operation and relationship CRUD.
+The card module containing the card CRUD operation and relationship CRUD.
 
 model.go: definition of orm based data model
 
