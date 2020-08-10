@@ -6,10 +6,13 @@ import (
 	"net/http"
 )
 
-func RegisterRoutes(r *gin.RouterGroup) {
-	r.POST("/create", createCard)
-	r.GET("/find/:reference", findCard)
-	r.DELETE("/remove/:reference", removeCard)
+func RegisterRoutes(r *gin.Engine) {
+	v1 := r.Group("/v1")
+	g := v1.Group("card")
+
+	g.POST("/create", createCard)
+	g.GET("/find/:reference", findCard)
+	g.DELETE("/remove/:reference", removeCard)
 }
 
 func createCard(c *gin.Context) {

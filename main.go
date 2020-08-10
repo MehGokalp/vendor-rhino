@@ -12,8 +12,7 @@ func main() {
 	migrate(db)
 
 	r := gin.Default()
-	v1 := r.Group("/v1")
-	card.RegisterRoutes(v1.Group("card"))
+	card.RegisterRoutes(r)
 
 	// TODO: Register oauth implementation to router
 

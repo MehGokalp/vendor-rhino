@@ -3,6 +3,7 @@ module github.com/mehgokalp/vendor-rhino
 go 1.13
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.4.1
 	github.com/brianvoe/gofakeit/v5 v5.9.1
 	github.com/gin-contrib/sse v0.1.0
 	github.com/gin-gonic/gin v1.5.0
