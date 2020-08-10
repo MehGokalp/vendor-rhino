@@ -13,7 +13,7 @@ func RegisterRoutes(r *gin.RouterGroup) {
 }
 
 func createCard(c *gin.Context) {
-	validator := NewCardValidator()
+	validator := NewCreateCardValidator()
 
 	if err := validator.Bind(c); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, common.NewValidatorError(err))
@@ -32,10 +32,15 @@ func createCard(c *gin.Context) {
 }
 
 func findCard(c *gin.Context) {
-	// TODO: Implement find card action
-	c.JSON(http.StatusOK, gin.H{
-		"message": "OK",
-	})
+	validator := NewFindCardValidator()
+
+	if err := validator.Bind(c); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, common.NewValidatorError(err))
+		return
+	}
+
+	serializer := CardSerializer{validator.Model}
+	c.JSON(http.StatusCreated, serializer.Response())
 }
 
 func removeCard(c *gin.Context) {

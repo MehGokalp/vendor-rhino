@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-type CardValidator struct {
+type CreateCardValidator struct {
 	Input struct {
 		Currency       string     `form:"currency" binding:"required"`
 		ActivationDate *time.Time `form:"activationDate" binding:"required" time_format:"2006-01-02"`
@@ -16,7 +16,7 @@ type CardValidator struct {
 	Model Card
 }
 
-func (v *CardValidator) Bind(c *gin.Context) error {
+func (v *CreateCardValidator) Bind(c *gin.Context) error {
 	err := common.Bind(c, v)
 	if err != nil {
 		return err
@@ -38,6 +38,36 @@ func (v *CardValidator) Bind(c *gin.Context) error {
 	return nil
 }
 
-func NewCardValidator() CardValidator {
-	return CardValidator{}
+func NewCreateCardValidator() CreateCardValidator {
+	return CreateCardValidator{}
+}
+
+type FindCardValidator struct {
+	Input struct {
+		Reference string `uri:"reference" binding:"required"`
+	}
+	Model Card
+}
+
+func (v *FindCardValidator) Bind(c *gin.Context) error {
+	err := common.BindUrl(c, v)
+	if err != nil {
+		return err
+	}
+
+	var card Card
+	DB := common.GetDB()
+	DB.Where("reference = ?", v.Input.Reference).Preload("Currency").First(&card)
+
+	if card.ID == 0 {
+		return CardNotFoundError{reference: v.Input.Reference}
+	}
+
+	v.Model = card
+
+	return nil
+}
+
+func NewFindCardValidator() FindCardValidator {
+	return FindCardValidator{}
 }

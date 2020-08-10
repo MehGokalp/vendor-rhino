@@ -16,6 +16,10 @@ func Bind(c *gin.Context, obj interface{}) error {
 	return c.ShouldBindWith(obj, b)
 }
 
+func BindUrl(c *gin.Context, obj interface{}) error {
+	return c.ShouldBindUri(obj)
+}
+
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 const (
 	letterIdxBits = 6                    // 6 bits to represent a letter index

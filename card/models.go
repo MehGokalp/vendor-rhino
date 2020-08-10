@@ -7,7 +7,6 @@ import (
 
 type Card struct {
 	gorm.Model
-	ID             uint       `gorm:"column:id"`
 	Balance        uint       `gorm:"column:balance"`
 	ActivationDate *time.Time `gorm:"column:activation_date"`
 	ExpireDate     *time.Time `gorm:"column:expire_date"`
