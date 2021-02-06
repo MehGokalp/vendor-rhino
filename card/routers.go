@@ -8,11 +8,10 @@ import (
 
 func RegisterRoutes(r *gin.Engine) {
 	v1 := r.Group("/v1")
-	g := v1.Group("card")
 
-	g.POST("/create", createCard)
-	g.GET("/find/:reference", findCard)
-	g.DELETE("/remove/:reference", removeCard)
+	v1.POST("/", createCard)
+	v1.GET("/:reference", findCard)
+	v1.DELETE("/:reference", deleteCard)
 }
 
 func createCard(c *gin.Context) {
@@ -43,10 +42,10 @@ func findCard(c *gin.Context) {
 	}
 
 	serializer := CardSerializer{validator.Model}
-	c.JSON(http.StatusCreated, serializer.Response())
+	c.JSON(http.StatusOK, serializer.Response())
 }
 
-func removeCard(c *gin.Context) {
+func deleteCard(c *gin.Context) {
 	validator := NewDeleteCardValidator()
 
 	if err := validator.Bind(c); err != nil {

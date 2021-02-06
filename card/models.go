@@ -23,16 +23,11 @@ func (c *Card) TableName() string {
 }
 
 type Currency struct {
-	ID    uint
+	ID    uint   `gorm:"primary_key"`
 	Code  string `gorm:"unique_index"`
 	Cards []Card `gorm:"ForeignKey:CurrencyId"`
 }
 
 func (c *Currency) TableName() string {
 	return "currency"
-}
-
-func AutoMigrate(db *gorm.DB) {
-	db.AutoMigrate(&Card{})
-	db.AutoMigrate(&Currency{})
 }
