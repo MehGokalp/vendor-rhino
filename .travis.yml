@@ -1,8 +1,7 @@
 language: go
 
 go:
-  - "1.13"
-  - master
+  - "1.13.8"
 
 jobs:
   fast_finish: true
@@ -14,8 +13,11 @@ go_import_path: github.com/MehGokalp/vendor-rhino
 services:
   - mysql
 
+before_install:
+  - bash .travis-ci/database.sh
+
 script:
-#  - go test -v ./...
+  - go test -v ./...
   - bash ./scripts/gofmt.sh
   - bash ./scripts/coverage.sh
 
