@@ -3,7 +3,6 @@ package card
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"github.com/mehgokalp/vendor-rhino/common"
@@ -17,61 +16,55 @@ import (
 	"time"
 )
 
-func GetRouter() *gin.Engine {
-	r := gin.Default()
-	RegisterRoutes(r)
+var router *gin.Engine
 
-	return r
+func getRouter() *gin.Engine {
+	if router != nil {
+		return router
+	}
+
+	router = gin.Default()
+	RegisterRoutes(router)
+
+	return router
 }
 
-func CheckHTTPResponse(t *testing.T, r *gin.Engine, req *http.Request, f func(w *httptest.ResponseRecorder) error) {
-
+func processRequest(r *gin.Engine, req *http.Request, t *testing.T, statusCode int) []byte {
 	// Create a response recorder
 	w := httptest.NewRecorder()
 
 	// Create the service and process the above request.
 	r.ServeHTTP(w, req)
 
-	if err := f(w); err != nil {
-		t.Log(err)
+	data, err := ioutil.ReadAll(w.Body)
+	assert.Nil(t, err)
+
+	if assert.Equal(t, statusCode, w.Code) != true {
+		err := fmt.Sprintf("An error occurred: '%s'", string(data))
+		t.Errorf(err)
 		t.Fail()
 	}
+
+	return data
 }
 
-func OpenDBConnection(t *testing.T) *gorm.DB {
-	var db *gorm.DB
-
-	_, mock, err := sqlmock.NewWithDSN("sqlmock_db_0")
-	if err != nil {
-		panic("Got an unexpected error.")
+func openDBConnection(t *testing.T) *gorm.DB {
+	db := common.Connect()
+	if err := FlushDB(db); err != nil {
+		t.Errorf("there were error while flushing the db: %s", err)
 	}
-
-	db, err = gorm.Open("sqlmock", "sqlmock_db_0")
-	if err != nil {
-		panic("Got an unexpected error.")
-	}
-
-	mock.ExpectBegin()
-	mock.ExpectQuery("CREATE TABLE .**")
-	common.DB = db
 
 	AutoMigrate(db)
 
-	mock.ExpectCommit()
-
-	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("there were unfulfilled expectations: %s", err)
+	if err := LoadFixtures(db); err != nil {
+		t.Errorf("there were error while loading fixtures: %s", err)
 	}
 
-	// To make http requests use our mock db
 	return db
 }
 
-func TestCreateCard(t *testing.T) {
-	db := OpenDBConnection(t)
-	defer db.Close()
-
-	r := GetRouter()
+func createTestCard(t *testing.T) CardResponse {
+	r := getRouter()
 	activationDate := time.Now().Add(time.Hour * 100)
 	expireDate := time.Now().Add(time.Hour * 150)
 	currency := "EUR"
@@ -82,35 +75,76 @@ func TestCreateCard(t *testing.T) {
 	payload.Set("expireDate", expireDate.Format("2006-01-02"))
 	payload.Set("balance", "5000")
 
-	req, err := http.NewRequest(http.MethodPost, "/v1/card/create", strings.NewReader(payload.Encode()))
+	req, err := http.NewRequest(http.MethodPost, "/v1/", strings.NewReader(payload.Encode()))
 	assert.Nil(t, err)
 
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-	CheckHTTPResponse(t, r, req, func(w *httptest.ResponseRecorder) error {
-		assert.Equal(t, http.StatusCreated, w.Code)
+	data := processRequest(r, req, t, http.StatusCreated)
 
-		data, err := ioutil.ReadAll(w.Body)
-		assert.Nil(t, err)
+	response := CardResponse{}
 
-		response := CardResponse{}
-		fmt.Println(string(data))
+	err = json.Unmarshal(data, &response)
+	assert.Nil(t, err)
 
-		err = json.Unmarshal(data, &response)
-		assert.Nil(t, err)
+	assert.Equal(t, currency, response.Currency)
+	assert.Equal(t, uint(5000), response.Balance)
 
-		assert.Equal(t, currency, response.Currency)
-		fmt.Println(response.Balance)
-		assert.Equal(t, uint(5000), response.Balance)
+	assert.NotNil(t, response.ActivationDate)
+	assert.NotNil(t, response.ExpireDate)
 
-		assert.NotNil(t, response.ActivationDate)
-		assert.NotNil(t, response.ExpireDate)
+	assert.NotNil(t, response.Reference)
+	assert.NotNil(t, response.Cvc)
+	assert.NotNil(t, response.CardNumber)
 
-		assert.NotNil(t, response.Reference)
-		assert.NotNil(t, response.Cvc)
-		assert.NotNil(t, response.CardNumber)
+	return response
+}
 
-		return nil
-	})
+func TestCreateCard(t *testing.T) {
+	db := openDBConnection(t)
+	defer db.Close()
+
+	createTestCard(t)
+}
+
+func TestReadCard(t *testing.T) {
+	db := openDBConnection(t)
+	defer db.Close()
+
+	createCardResponse := createTestCard(t)
+
+	r := getRouter()
+	req, err := http.NewRequest(http.MethodGet, "/v1/"+createCardResponse.Reference, nil)
+	assert.Nil(t, err)
+
+	req.Header.Set("Accept", "application/json")
+
+	data := processRequest(r, req, t, http.StatusOK)
+
+	response := CardResponse{}
+
+	err = json.Unmarshal(data, &response)
+	assert.Nil(t, err)
+
+	assert.Equal(t, createCardResponse.Currency, response.Currency)
+	assert.Equal(t, createCardResponse.Balance, response.Balance)
+	assert.Equal(t, createCardResponse.ActivationDate.Unix(), response.ActivationDate.Unix())
+	assert.Equal(t, createCardResponse.ExpireDate.Unix(), response.ExpireDate.Unix())
+	assert.Equal(t, createCardResponse.Reference, response.Reference)
+	assert.Equal(t, createCardResponse.CardNumber, response.CardNumber)
+	assert.Equal(t, createCardResponse.Cvc, response.Cvc)
+}
+
+func TestDeleteCard(t *testing.T) {
+	db := openDBConnection(t)
+	defer db.Close()
+
+	createCardResponse := createTestCard(t)
+
+	r := getRouter()
+	req, err := http.NewRequest(http.MethodDelete, "/v1/"+createCardResponse.Reference, nil)
+	assert.Nil(t, err)
+
+	processRequest(r, req, t, http.StatusNoContent)
 }

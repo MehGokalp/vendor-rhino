@@ -26,7 +26,7 @@ func (v *CreateCardValidator) Bind(c *gin.Context) error {
 
 	currency := Currency{}
 	DB := common.GetDB()
-	DB.Where("code = '?'", v.Input.Currency).First(&currency)
+	DB.First(&currency, "code = ?", v.Input.Currency)
 
 	if currency.ID == 0 {
 		return CurrencyNotFoundError{currencyCode: v.Input.Currency}
