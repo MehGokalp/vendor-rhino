@@ -23,3 +23,6 @@ script:
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
+
+env:
+  - VENDOR_RHINO_DATABASE_DNS="root:@/vendor_rhino?charset=utf8&parseTime=True"

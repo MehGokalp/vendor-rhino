@@ -3,13 +3,13 @@ package common
 import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"os"
 )
 
 var DB *gorm.DB
 
 func Connect() *gorm.DB {
-	// TODO: read password from .env
-	db, err := gorm.Open("mysql", "root:@/vendor_rhino?charset=utf8&parseTime=True")
+	db, err := gorm.Open("mysql", os.Getenv("VENDOR_RHINO_DATABASE_DNS"))
 
 	if err != nil {
 		panic(err)
