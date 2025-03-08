@@ -1,24 +1,36 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
-	"github.com/mehgokalp/vendor-rhino/card"
-	"github.com/mehgokalp/vendor-rhino/common"
+	"github.com/mehgokalp/vendor-rhino/cmd/server"
+	"github.com/mehgokalp/vendor-rhino/internal/card/factory"
+	"github.com/mehgokalp/vendor-rhino/internal/repository"
+	"github.com/mehgokalp/vendor-rhino/migrations"
+	"github.com/spf13/cobra"
+	"os"
 )
 
 func main() {
-	db := common.Connect()
-	migrate(db)
+	rootCmd := &cobra.Command{
+		Use:   "vendor-rhino",
+		Short: "Main entry-point command for the application",
+	}
 
-	r := gin.Default()
-	card.RegisterRoutes(r)
+	db, err := gorm.Open("mysql", os.Getenv("VENDOR_RHINO_DATABASE_DNS"))
+	if err != nil {
+		panic(err)
+	}
+	migrations.AutoMigrate(db)
 
-	// TODO: Register oauth implementation to router
+	currencyRepository := repository.NewCurrencyRepository(db)
+	cardRepository := repository.NewCardRepository(db)
+	cardFactory := factory.NewCardFactory()
 
-	r.Run()
-}
-
-func migrate(db *gorm.DB) {
-	card.AutoMigrate(db)
+	rootCmd.AddCommand(
+		server.Server(
+			currencyRepository,
+			cardRepository,
+			cardFactory,
+		),
+	)
 }

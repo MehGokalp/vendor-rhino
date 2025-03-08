@@ -1,30 +1,6 @@
-package card
+package migrations
 
-import (
-	"github.com/jinzhu/gorm"
-)
-
-func LoadFixtures(db *gorm.DB) error {
-	tx := db.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-		}
-	}()
-
-	if err := tx.Error; err != nil {
-		return err
-	}
-
-	for _, code := range []string{"USD", "EUR", "GBP"} {
-		if err := tx.Create(&Currency{Code: code}).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
-	}
-
-	return tx.Commit().Error
-}
+import "github.com/jinzhu/gorm"
 
 func FlushDB(db *gorm.DB) error {
 	var tableInfo []struct {
@@ -57,9 +33,4 @@ func FlushDB(db *gorm.DB) error {
 	}
 
 	return tx.Commit().Error
-}
-
-func AutoMigrate(db *gorm.DB) {
-	db.AutoMigrate(&Card{})
-	db.AutoMigrate(&Currency{})
 }

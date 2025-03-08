@@ -1,4 +1,4 @@
-package card
+package entity
 
 import (
 	"github.com/jinzhu/gorm"
